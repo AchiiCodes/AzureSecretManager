@@ -23,10 +23,10 @@
     "@azure/arm-keyvault": "^5.0.0",
     "@azure/identity": "^4.6.0",
     "@azure/keyvault-secrets": "^4.9.0",
-    "electron": "^43.2.0",
     "electron-updater": "^6.3.9"
   },
   "devDependencies": {
+    "electron": "^43.2.0",
     "electron-builder": "^25.1.8"
   },
   "build": {
