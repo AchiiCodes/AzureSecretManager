@@ -47,11 +47,14 @@ https://my-vault.vault.azure.net
 
 ## Releases & Auto-Update
 
-- `.github/workflows/build.yml` builds Windows/macOS/Linux installers on every push and PR (uploaded as workflow artifacts for testing).
-- Pushing a tag like `v1.2.3` additionally publishes those installers to a GitHub Release and update feed.
-- Packaged installs check that feed on startup via `electron-updater`; when a newer release is downloaded, the status bar shows `Update ready — click to restart and install.`
+- Commits merged to `main` must follow [Conventional Commits](https://www.conventionalcommits.org/) (`fix: ...`, `feat: ...`, `feat!: ...` / `BREAKING CHANGE:` in the body). `.github/workflows/release.yml` runs `semantic-release` on every push to `main`, which reads those commits and decides the bump:
+  - `fix:` → patch, `feat:` → minor, `BREAKING CHANGE:`/`feat!:` → major.
+  - No matching commit type (e.g. `chore:`, `docs:`) → no release at all.
+- On a release, `semantic-release` bumps `version` in `package.json`, commits that back with `[skip ci]`, tags `v<version>`, and creates a GitHub Release with generated notes.
+- That tag push triggers `.github/workflows/build.yml`, which builds Windows/macOS/Linux installers and uploads them to the same release.
+- Plain pushes/PRs (no release produced) still run `build.yml` for Windows/macOS/Linux, uploaded as workflow artifacts for testing — not published, not seen by auto-update.
+- Packaged installs check the release feed on startup via `electron-updater`; when a newer release is downloaded, the status bar shows `Update ready — click to restart and install.`
 - Auto-update covers the Windows NSIS installer, macOS DMG, and Linux AppImage. The `.deb` package has no auto-update support upstream and must be reinstalled manually.
-- To cut a release: bump `version` in `package.json`, commit, then `git tag v<version> && git push origin v<version>`.
 
 ## Safety Notes
 
