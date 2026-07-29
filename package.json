@@ -45,7 +45,8 @@
     "publish": {
       "provider": "github",
       "owner": "AchiiCodes",
-      "repo": "AzureSecretManager"
+      "repo": "AzureSecretManager",
+      "releaseType": "release"
     },
     "win": {
       "target": "nsis"
