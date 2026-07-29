@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none';" />
+    <title>Azure Secret Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="topbar-actions">
+          <section id="status" class="status" role="status" aria-live="polite"></section>
+          <span id="appVersion" class="app-version">v0.1.0</span>
+          <div class="profile-menu">
+            <button id="profileButton" class="profile-button" type="button" aria-haspopup="true" aria-expanded="false">
+              <span id="profileAvatar" class="profile-avatar">?</span>
+              <span class="profile-copy">
+                <strong id="accountUser">Not logged in</strong>
+                <span id="accountMeta">Login required</span>
+              </span>
+            </button>
+            <section id="profileDropdown" class="profile-dropdown panel hidden" aria-label="Account menu">
+              <div class="profile-detail">
+                <span id="profileAvatarLarge" class="profile-avatar large">?</span>
+                <div>
+                  <strong id="profileName">Not logged in</strong>
+                  <span id="profileEmail">No Azure account connected</span>
+                </div>
+              </div>
+              <dl class="profile-facts">
+                <dt>Tenant</dt>
+                <dd id="profileTenant">Unknown</dd>
+                <dt>Subscription</dt>
+                <dd id="profileSubscription">Unknown</dd>
+              </dl>
+              <section class="theme-picker" aria-label="Color theme">
+                <span>Theme</span>
+                <div id="themeSwatches" class="theme-swatches">
+                  <button class="theme-swatch" type="button" data-theme="dark" aria-label="Use dark theme" title="Dark"></button>
+                  <button class="theme-swatch" type="button" data-theme="light" aria-label="Use light theme" title="Light"></button>
+                  <button class="theme-swatch" type="button" data-theme="ocean" aria-label="Use ocean theme" title="Ocean"></button>
+                  <button class="theme-swatch" type="button" data-theme="grape" aria-label="Use grape theme" title="Grape"></button>
+                  <button class="theme-swatch" type="button" data-theme="ember" aria-label="Use ember theme" title="Ember"></button>
+                  <button class="theme-swatch" type="button" data-theme="forest" aria-label="Use forest theme" title="Forest"></button>
+                </div>
+              </section>
+              <div class="profile-actions">
+                <button id="loginAzure" class="primary" type="button">Login</button>
+                <button id="refreshAccount" class="ghost" type="button">Refresh</button>
+                <button id="logoutAzure" class="danger" type="button">Logout</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls panel">
+        <div class="section-label">
+          <span>Vault</span>
+          <div class="mode-switch" role="group" aria-label="Vault selection mode">
+            <button id="automaticMode" class="mode-option active" type="button">Automatic</button>
+            <button id="manualMode" class="mode-option" type="button">Manual</button>
+          </div>
+        </div>
+        <div id="automaticVaultControls" class="vault-mode-grid">
+          <div class="field vault-combobox">
+            <div class="vault-combobox-heading">
+              <span>Key Vault</span>
+            </div>
+            <div class="vault-combobox-input">
+              <button id="vaultComboboxButton" class="vault-combobox-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span class="vault-combobox-copy">
+                  <strong id="selectedVaultLabel">Fetching Key Vaults...</strong>
+                </span>
+                <span id="selectedVaultMeta" class="selected-vault-meta placeholder">Search by name, resource group, subscription, URL, or tag</span>
+              </button>
+              <button id="refreshVaults" class="icon-button refresh vault-refresh" type="button" aria-label="Refresh Key Vaults" title="Refresh Key Vaults">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 11a8 8 0 0 0-14.2-4.9L4 8" />
+                  <path d="M4 4v4h4" />
+                  <path d="M4 13a8 8 0 0 0 14.2 4.9L20 16" />
+                  <path d="M20 20v-4h-4" />
+                </svg>
+              </button>
+            </div>
+            <div id="vaultComboboxPanel" class="vault-combobox-panel hidden">
+              <input id="vaultSearch" type="search" placeholder="Search vaults..." autocomplete="off" spellcheck="false" />
+              <div id="vaultOptions" class="vault-options" role="listbox" aria-label="Key Vaults"></div>
+            </div>
+          </div>
+        </div>
+        <div id="manualVaultControls" class="vault-mode-grid hidden">
+          <label class="field vault-field">
+            <span>Manual Vault URL</span>
+            <input id="vaultUrl" type="url" placeholder="https://my-vault.vault.azure.net" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="list panel">
+          <div class="list-heading">
+            <div class="list-title">
+              <h2>Secrets</h2>
+              <span id="count">0</span>
+            </div>
+            <div class="list-actions">
+              <button id="loadSecrets" class="icon-button refresh" type="button" aria-label="Refresh secrets" title="Refresh secrets">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 11a8 8 0 0 0-14.2-4.9L4 8" />
+                  <path d="M4 4v4h4" />
+                  <path d="M4 13a8 8 0 0 0 14.2 4.9L20 16" />
+                  <path d="M20 20v-4h-4" />
+                </svg>
+              </button>
+              <button id="newSecret" class="icon-button add primary-icon" type="button" aria-label="Add secret" title="Add secret"></button>
+            </div>
+          </div>
+          <div class="list-ordering">
+            <label class="field sort-field">
+              <span>Order by</span>
+              <select id="secretSort">
+                <option value="updatedOn">Updated date</option>
+                <option value="createdOn">Created date</option>
+              </select>
+            </label>
+            <label class="field direction-field">
+              <span>Direction</span>
+              <select id="secretSortDirection">
+                <option value="desc">Newest first</option>
+                <option value="asc">Oldest first</option>
+              </select>
+            </label>
+          </div>
+          <div class="list-tools">
+            <label class="field search-field">
+              <span>Search secrets</span>
+              <input id="search" type="search" placeholder="name, tag, content type" autocomplete="off" spellcheck="false" />
+            </label>
+            <label class="toggle">
+              <input id="includeDisabled" type="checkbox" checked />
+              <span>Disabled</span>
+            </label>
+          </div>
+          <div id="secretList" class="secret-list empty">Fetching Key Vaults...</div>
+        </aside>
+
+        <section class="details panel">
+          <div id="emptyDetails" class="empty-details">
+            <p id="emptyDetailsMessage">Select a secret or create a new one.</p>
+            <button id="newSecretEmpty" class="primary">Add secret</button>
+          </div>
+
+          <article id="secretDetails" class="secret-details hidden">
+            <div class="details-header">
+              <div>
+                <p class="eyebrow">Selected Secret</p>
+                <div class="secret-title-row">
+                  <h2 id="secretName"></h2>
+                  <button id="copySecretName" class="icon-button copy title-copy" type="button" aria-label="Copy secret name" title="Copy secret name"></button>
+                </div>
+              </div>
+              <div class="details-header-actions">
+                <span id="secretState" class="pill"></span>
+                <button id="migrateSecret" class="icon-button migrate" type="button" aria-label="Recreate secret in another Key Vault" title="Recreate secret in another Key Vault">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h11" />
+                    <path d="m12 4 3 3-3 3" />
+                    <path d="M20 17H9" />
+                    <path d="m12 14-3 3 3 3" />
+                    <path d="M5 14v6" />
+                    <path d="M19 4v6" />
+                  </svg>
+                </button>
+                <button id="openSecret" class="icon-button globe" type="button" aria-label="Open secret in Azure Portal" title="Open secret in Azure Portal">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M3 12h18" />
+                    <path d="M12 3a14 14 0 0 1 0 18" />
+                    <path d="M12 3a14 14 0 0 0 0 18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="value-box">
+              <div class="value-heading">
+                <span>Value</span>
+                <div class="value-heading-actions">
+                  <span id="valueState">Hidden</span>
+                  <button id="revealSecret" class="icon-button eye value-action" type="button" aria-label="Reveal secret value" title="Reveal secret value"></button>
+                  <button id="hideSecret" class="icon-button eye-off value-action hidden" type="button" aria-label="Hide secret value" title="Hide secret value"></button>
+                  <button id="copySecret" class="icon-button copy value-copy" type="button" aria-label="Copy secret value" title="Copy secret value"></button>
+                  <button id="editSecret" class="icon-button pencil value-action" type="button" aria-label="Update secret" title="Update secret">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <pre id="secretValue">••••••••••••••••</pre>
+            </div>
+
+            <section id="versionPanel" class="version-panel">
+              <div class="version-heading">
+                <div>
+                  <h3>Versions</h3>
+                  <span id="versionCount">Latest version</span>
+                </div>
+              </div>
+              <label class="field version-field">
+                <span>Secret version</span>
+                <select id="secretVersion">
+                  <option value="">Latest</option>
+                </select>
+              </label>
+            </section>
+
+            <dl class="metadata" id="metadata"></dl>
+            <div class="tags">
+              <h3>Tags</h3>
+              <div id="tags"></div>
+            </div>
+
+            <div class="details-footer">
+              <button id="deleteSecret" class="danger">Delete</button>
+            </div>
+          </article>
+
+          <form id="migrateForm" class="migrate-form hidden">
+            <div class="details-header">
+              <div>
+                <p class="eyebrow">Recreate Secret</p>
+                <h2 id="migrateFormTitle">Recreate in another Key Vault</h2>
+                <div class="migrate-toggle-row">
+                  <label class="switch-toggle">
+                    <input id="migrateRenameToggle" type="checkbox" />
+                    <span class="switch-track" aria-hidden="true"></span>
+                    <span>Rename secret</span>
+                  </label>
+                  <label class="switch-toggle">
+                    <input id="migrateValueToggle" type="checkbox" />
+                    <span class="switch-track" aria-hidden="true"></span>
+                    <span>Change value</span>
+                  </label>
+                </div>
+              </div>
+              <button id="cancelMigrateForm" class="secondary" type="button">Cancel</button>
+            </div>
+            <div id="migrateVaultCombobox" class="field vault-combobox migrate-vault-combobox">
+              <div class="vault-combobox-heading">
+                <span>Destination Key Vault</span>
+              </div>
+              <button id="migrateVaultButton" class="vault-combobox-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span class="vault-combobox-copy">
+                  <strong id="selectedMigrateVaultLabel">Select destination Key Vault</strong>
+                </span>
+                <span id="selectedMigrateVaultMeta" class="selected-vault-meta placeholder">Search by name, resource group, subscription, URL, or tag</span>
+              </button>
+              <div id="migrateVaultPanel" class="vault-combobox-panel hidden">
+                <input id="migrateVaultSearch" type="search" placeholder="Search destination vaults..." autocomplete="off" spellcheck="false" />
+                <div id="migrateVaultOptions" class="vault-options" role="listbox" aria-label="Destination Key Vaults"></div>
+              </div>
+            </div>
+            <div id="migrateSameVaultWarning" class="migrate-warning hidden" role="alert">
+              Same Key Vault selected. Rename secret before recreating.
+            </div>
+            <label id="migrateNameField" class="field hidden">
+              <span>New name</span>
+              <input id="migrateSecretName" type="text" placeholder="my-secret-name" autocomplete="off" spellcheck="false" />
+            </label>
+            <label id="migrateValueField" class="field hidden">
+              <span>New value</span>
+              <textarea id="migrateSecretValue" placeholder="New secret value"></textarea>
+            </label>
+            <label class="field">
+              <span>Expiration date</span>
+              <input id="migrateExpiresOn" type="datetime-local" autocomplete="off" />
+            </label>
+            <button id="submitMigrateSecret" class="primary" type="submit">Recreate secret</button>
+          </form>
+
+          <form id="secretForm" class="secret-form hidden">
+            <div class="details-header">
+              <div>
+                <p class="eyebrow">Write Secret</p>
+                <h2 id="secretFormTitle">Add secret</h2>
+              </div>
+              <button id="cancelSecretForm" class="secondary" type="button">Cancel</button>
+            </div>
+            <label class="field">
+              <span>Name</span>
+              <input id="secretFormName" type="text" placeholder="my-secret-name" autocomplete="off" spellcheck="false" required />
+            </label>
+            <label class="field">
+              <span>Value</span>
+              <textarea id="secretFormValue" placeholder="secret value" required></textarea>
+            </label>
+            <label class="field">
+              <span>Content type</span>
+              <input id="secretFormContentType" type="text" placeholder="optional" autocomplete="off" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span>Expiration date</span>
+              <input id="secretFormExpiresOn" type="datetime-local" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Tags JSON</span>
+              <textarea id="secretFormTags" placeholder='{"owner":"team-a"}'></textarea>
+            </label>
+            <button id="saveSecret" class="primary" type="submit">Save secret</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "azure-secret-manager",
+  "productName": "Azure Secret Manager",
+  "version": "0.1.0",
+  "description": "Electron desktop app for viewing and searching Azure Key Vault secrets.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/app.js"
+  },
+  "keywords": [
+    "electron",
+    "azure",
+    "key-vault",
+    "secrets"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@azure/arm-keyvault": "^5.0.0",
+    "@azure/identity": "^4.6.0",
+    "@azure/keyvault-secrets": "^4.9.0",
+    "electron": "^43.2.0"
+  }
+}
