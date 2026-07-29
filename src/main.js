@@ -227,9 +227,15 @@ async function listKeyVaults() {
   return { vaults, warnings };
 }
 
+const AZ_COMMAND = process.platform === 'win32' ? 'az.cmd' : 'az';
+
 async function runAz(args) {
   try {
-    const { stdout } = await execFileAsync('az', args, { maxBuffer: 10 * 1024 * 1024, timeout: 60_000 });
+    const { stdout } = await execFileAsync(AZ_COMMAND, args, {
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 60_000,
+      shell: process.platform === 'win32'
+    });
     return stdout.trim() ? JSON.parse(stdout) : null;
   } catch (error) {
     const details = error.stderr || error.stdout || error.message;
