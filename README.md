@@ -18,7 +18,7 @@ Electron desktop app for browsing and searching Azure Key Vault secrets.
 
 ## Prerequisites
 
-- Node.js 20 or newer recommended.
+- Node.js 22 or newer recommended (CI/release tooling requires it).
 - Azure CLI installed for login and account display.
 - Azure management-plane access to list subscriptions and Key Vault resources, such as Reader on target subscriptions/resource groups.
 - Data-plane access to selected Azure Key Vault with `secrets/list`, `secrets/get`, `secrets/set`, and `secrets/delete` permissions.

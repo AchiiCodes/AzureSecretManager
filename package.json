@@ -17,7 +17,7 @@
     "key-vault",
     "secrets"
   ],
-  "author": "",
+  "author": "AchiiCodes <noreply@users.noreply.github.com>",
   "license": "MIT",
   "dependencies": {
     "@azure/arm-keyvault": "^5.0.0",
@@ -32,8 +32,9 @@
     "semantic-release": "^25.0.8"
   },
   "build": {
-    "appId": "com.teamrockstars.azuresecretmanager",
+    "appId": "com.achiicodes.azuresecretmanager",
     "productName": "Azure Secret Manager",
+    "icon": "src/assets/retro-key.png",
     "directories": {
       "output": "dist"
     },
