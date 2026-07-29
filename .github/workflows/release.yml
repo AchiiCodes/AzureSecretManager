@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   release:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,9 +27,15 @@ jobs:
         run: npm ci
 
       # Analyzes commits since the last tag (Conventional Commits), bumps
-      # package.json, commits "[skip ci]", tags v<version>, and creates a
-      # GitHub Release. That tag push then triggers build.yml, which builds
-      # the installers and uploads them to this same release.
+      # package.json, commits, tags v<version>, and creates a GitHub Release.
+      # That tag push then triggers build.yml, which builds the installers
+      # and uploads them to this same release.
+      #
+      # The release commit message must NOT contain "[skip ci]": the tag
+      # points at that same commit, and GitHub's skip-ci applies to every
+      # workflow run triggered off that commit, including the tag push that
+      # build.yml needs. The `if:` above prevents this job re-triggering on
+      # its own release commit instead.
       #
       # Uses RELEASE_TOKEN (a PAT), not the default GITHUB_TOKEN: GitHub
       # blocks the default token's pushes from triggering other workflows
