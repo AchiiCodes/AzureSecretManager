@@ -966,6 +966,19 @@ input[readonly] {
   animation: statusPulse 1.35s ease-in-out infinite;
 }
 
+.status.update {
+  border-color: rgba(125, 223, 199, 0.24);
+  background: linear-gradient(135deg, rgba(125, 223, 199, 0.13), rgba(125, 223, 199, 0.035));
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.status.update::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(125, 223, 199, 0.13);
+  animation: statusPulse 1.35s ease-in-out infinite;
+}
+
 @keyframes statusPulse {
   0%,
   100% {

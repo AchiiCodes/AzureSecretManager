@@ -159,6 +159,7 @@ function applyTheme() {
 function setStatus(message, type = '') {
   elements.status.textContent = message;
   elements.status.className = `status ${type}`.trim();
+  if (type !== 'update') delete elements.status.dataset.updateReady;
 }
 
 function selectedSecret() {
@@ -1274,3 +1275,11 @@ renderVaultOptions(elements.vaultUrl.value);
 renderMigrateFieldToggles();
 render();
 loadAccount({ refreshVaults: true });
+
+elements.status.addEventListener('click', () => {
+  if (elements.status.dataset.updateReady === 'true') window.azureSecrets.installUpdate();
+});
+window.azureSecrets.onUpdateDownloaded(({ version }) => {
+  elements.status.dataset.updateReady = 'true';
+  setStatus(`Update v${version} ready — click to restart and install.`, 'update');
+});

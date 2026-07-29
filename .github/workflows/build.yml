@@ -1,0 +1,64 @@
+name: Build desktop app
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            flag: --win
+            artifact: windows
+          - os: macos-latest
+            flag: --mac
+            artifact: macos
+          - os: ubuntu-latest
+            flag: --linux
+            artifact: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Tag pushes (v1.2.3) publish installers + update feed to a GitHub Release
+      # that electron-updater checks on app startup. Other builds just produce
+      # local artifacts for download/testing.
+      - name: Build (and publish on tag) ${{ matrix.artifact }} app
+        run: npx electron-builder ${{ matrix.flag }} --publish ${{ startsWith(github.ref, 'refs/tags/v') && 'always' || 'never' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-secret-manager-${{ matrix.artifact }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.zip
+          if-no-files-found: warn
+          retention-days: 14

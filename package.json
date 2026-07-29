@@ -6,7 +6,10 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/app.js"
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/app.js",
+    "dist:win": "electron-builder --win --publish=never",
+    "dist:mac": "electron-builder --mac --publish=never",
+    "dist:linux": "electron-builder --linux --publish=never"
   },
   "keywords": [
     "electron",
@@ -20,6 +23,44 @@
     "@azure/arm-keyvault": "^5.0.0",
     "@azure/identity": "^4.6.0",
     "@azure/keyvault-secrets": "^4.9.0",
-    "electron": "^43.2.0"
+    "electron": "^43.2.0",
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.teamrockstars.azuresecretmanager",
+    "productName": "Azure Secret Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "AchiiCodes",
+      "repo": "AzureSecretManager"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": "dmg",
+      "identity": null
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    }
   }
 }

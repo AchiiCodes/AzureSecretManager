@@ -13,5 +13,9 @@ contextBridge.exposeInMainWorld('azureSecrets', {
   migrateSecret: (payload) => ipcRenderer.invoke('vault:migrate-secret', payload),
   deleteSecret: (payload) => ipcRenderer.invoke('vault:delete-secret', payload),
   openUrl: (url) => ipcRenderer.invoke('shell:open-url', url),
-  copyText: (text) => ipcRenderer.invoke('clipboard:write-text', text)
+  copyText: (text) => ipcRenderer.invoke('clipboard:write-text', text),
+  onUpdateDownloaded: (callback) => {
+    ipcRenderer.on('app:update-downloaded', (_event, info) => callback(info));
+  },
+  installUpdate: () => ipcRenderer.invoke('app:install-update')
 });

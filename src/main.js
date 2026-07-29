@@ -2,6 +2,7 @@ const { app, BrowserWindow, clipboard, ipcMain, nativeImage, shell } = require('
 const { execFile } = require('node:child_process');
 const path = require('node:path');
 const { promisify } = require('node:util');
+const { autoUpdater } = require('electron-updater');
 const { KeyVaultManagementClient } = require('@azure/arm-keyvault');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
@@ -45,6 +46,24 @@ function createWindow() {
       // Block non-Azure external URLs from renderer-created windows.
     }
     return { action: 'deny' };
+  });
+}
+
+function setUpAutoUpdates() {
+  if (!app.isPackaged) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = false;
+
+  autoUpdater.on('update-downloaded', (info) => {
+    mainWindow?.webContents.send('app:update-downloaded', { version: info.version });
+  });
+  autoUpdater.on('error', (error) => {
+    console.error('Auto-update check failed:', error);
+  });
+
+  autoUpdater.checkForUpdates().catch((error) => {
+    console.error('Auto-update check failed:', error);
   });
 }
 
@@ -473,6 +492,9 @@ ipcMain.handle('clipboard:write-text', async (_event, text) => {
   clipboard.writeText(String(text || ''));
   return true;
 });
+ipcMain.handle('app:install-update', () => {
+  autoUpdater.quitAndInstall();
+});
 
 app.whenReady().then(() => {
   const appIcon = nativeImage.createFromPath(appIconPath);
@@ -482,6 +504,7 @@ app.whenReady().then(() => {
   }
 
   createWindow();
+  setUpAutoUpdates();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

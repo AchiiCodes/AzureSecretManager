@@ -45,6 +45,14 @@ On launch, app checks Azure CLI login first. After login, it fetches accessible 
 https://my-vault.vault.azure.net
 ```
 
+## Releases & Auto-Update
+
+- `.github/workflows/build.yml` builds Windows/macOS/Linux installers on every push and PR (uploaded as workflow artifacts for testing).
+- Pushing a tag like `v1.2.3` additionally publishes those installers to a GitHub Release and update feed.
+- Packaged installs check that feed on startup via `electron-updater`; when a newer release is downloaded, the status bar shows `Update ready — click to restart and install.`
+- Auto-update covers the Windows NSIS installer, macOS DMG, and Linux AppImage. The `.deb` package has no auto-update support upstream and must be reinstalled manually.
+- To cut a release: bump `version` in `package.json`, commit, then `git tag v<version> && git push origin v<version>`.
+
 ## Safety Notes
 
 - Secret values are not loaded during search/listing.
